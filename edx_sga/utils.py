@@ -4,7 +4,6 @@ Utility functions for the SGA XBlock
 import datetime
 import hashlib
 import os
-import time
 from functools import partial
 
 import pytz
@@ -83,9 +82,10 @@ def get_file_modified_time_utc(file_path):
     Gets the UTC timezone-aware modified time of a file at the given file path
     """
     file_timezone = (
-        # time.tzname returns a 2 element tuple:
-        #   (local non-DST timezone, e.g.: 'EST', local DST timezone, e.g.: 'EDT')
-        pytz.timezone(time.tzname[0])
+        # Django sets the process timezone to settings.TIME_ZONE, so naive local file
+        # times are in that zone. time.tzname only gives an abbreviation (e.g. 'IST'),
+        # which pytz cannot always resolve.
+        pytz.timezone(settings.TIME_ZONE)
         if isinstance(default_storage, FileSystemStorage)
         else pytz.utc
     )
